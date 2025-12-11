@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+echo $(exiftool -s -s -s -DateTimeOriginal -SubSecTimeOriginal "$1")

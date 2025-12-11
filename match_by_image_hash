@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+xarpite -q '
+  
+  OUT << "set -e"
+  OUT << "set -x"
+
+  IN
+  >> JSONSD
+  >> FILTER[o -> o.path =~ /\.jpg$/i] // pngはGoogleフォト上に存在しないので無視
+  >> GROUP[by: o -> o.image_hash] // 同一の画像データを持つグループを抽出
+  >> FILTER[g -> g.1.$# >= 2] // 重複がないものは無視
+  | g => (
+    
+    OUT << "# $(g.0)" // image_hash
+
+    sortedOo := g.1()
+      >> SORT[by: o -> o.path] // 撮影時刻が早いものを優先
+      >> SORT[by: o -> o.path.$#] // 接尾辞がないものを優先
+      >> SORTR[by: o -> o.size.+] // サイズが大きいものを優先
+      >> TO_ARRAY
+
+    // 削除対象表示
+    sortedOo() | i, o => (
+      OUT << "#   [$i] $(i == 0 ? " " : "D")  $%10d(o.size.+)  $(o.path)"
+    )
+
+    // 削除
+    sortedOo() >> DROP[1] | o => (
+      OUT << "./delete_if_image_hash_match_and_smaller \x27$(o.path)\x27 \x27$(sortedOo.0)\x27"
+    )
+
+  )
+
+'

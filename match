@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+deleting=$1
+archived=$2
+xarpite '
+  deletingList  := READ(ARGS.0) >> JSONSD >> TO_ARRAY
+  archivedTable := READ(ARGS.1) >> JSONSD | [_.md5, _] >> TO_OBJECT
+  deletingList() | deleting => (
+    archived := archivedTable(deleting.md5) ?: skip !! E
+    "./delete_if_match \x27$(deleting.path)\x27 \x27$(archived.path)\x27"
+  ) !: skip
+' "$deleting" "$archived"

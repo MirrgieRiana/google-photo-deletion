@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -o pipefail
+
+md5=$(cat "$1" | exiftool -all= -o - - | md5sum | awk '{print $1}') || exit
+echo "$md5"

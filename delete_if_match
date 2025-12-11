@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+error() {
+  echo "$1" >&2
+  exit "$2"
+}
+
+(($# != 2)) && error "usage: $0 deleting archived" 1
+deleting=$1
+archived=$2
+[ -f "$deleting" ] || error "deleting file not found: $deleting" 0
+[ -f "$archived" ] || error "archived file not found: $archived" 1
+[ "$deleting" == "$archived" ] && error "deleting and archived files are the same: $deleting" 1
+
+deleting_md5=$(md5sum "$deleting" | awk '{print $1}')
+archived_md5=$(md5sum "$archived" | awk '{print $1}')
+[ -z "$deleting_md5" ] && error "could not compute md5 for deleting file: $deleting" 1
+[ -z "$archived_md5" ] && error "could not compute md5 for archived file: $archived" 1
+
+echo "Deleting file: $deleting_md5  $deleting"
+echo "Archived file: $archived_md5  $archived"
+
+[ "$deleting_md5" != "$archived_md5" ] && error "files differ: $deleting_md5 $archived_md5" 1
+
+echo "Deleting: $deleting"
+rm -- "$deleting" || exit

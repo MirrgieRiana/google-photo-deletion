@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+find "$1" -type f | while IFS= read f
+do
+    echo "$(stat -c '%s' "$f")|$(./get_timestamp "$f")|$(md5sum "$f" | awk '{print $1}')|$(./get_image_hash "$f")|$f"
+done

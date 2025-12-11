@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+xarpite '
+  IN | index, line => (
+    sections := line >> SPLIT["|"] >> TO_ARRAY
+    sections.$# == 5 || !! "Invalid line format: $index: $line"
+    {
+      size      : sections.0
+      time      : sections.1
+      md5       : sections.2
+      image_hash: sections.3
+      path      : sections.4
+    }
+  )
+  >> JSONS[indent: " "]
+'

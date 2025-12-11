@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+
+error() {
+  echo "$1" >&2
+  exit "$2"
+}
+
+(($# != 2)) && error "usage: $0 deleting archived" 1
+deleting=$1
+archived=$2
+[ -f "$deleting" ] || error "deleting file not found: $deleting" 0
+[ -f "$archived" ] || error "archived file not found: $archived" 1
+[ "$deleting" == "$archived" ] && error "deleting and archived files are the same: $deleting" 1
+
+deleting_image_hash=$(./get_image_hash "$deleting")
+archived_image_hash=$(./get_image_hash "$archived")
+[ -z "$deleting_image_hash" ] && error "could not compute image hash for deleting file: $deleting" 1
+[ -z "$archived_image_hash" ] && error "could not compute image hash for archived file: $archived" 1
+
+echo "Deleting file: $deleting_image_hash  $deleting"
+echo "Archived file: $archived_image_hash  $archived"
+
+[ "$deleting_image_hash" != "$archived_image_hash" ] && error "files differ: $deleting_image_hash $archived_image_hash" 1
+
+deleting_size=$(stat -c '%s' "$deleting")
+archived_size=$(stat -c '%s' "$archived")
+[ -z "$deleting_size" ] && error "could not get size for deleting file: $deleting" 1
+[ -z "$archived_size" ] && error "could not get size for archived file: $archived" 1
+
+[ "$deleting_size" -gt "$archived_size" ] && error "deleting file is larger: $deleting_size > $archived_size" 1
+
+echo "Deleting: $deleting"
+rm -- "$deleting" || exit
