@@ -1,0 +1,5 @@
+/*.md5s
+/*.md5s.jsons
+/takeout-*Z-*/
+tmp*
+/.idea/
