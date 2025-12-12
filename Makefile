@@ -36,3 +36,8 @@ delete_extra_files:
 delete_if_match: $(JSONS)
 	./match takeout.md5s.jsons archive.md5s.jsons | bash
 	./match takeout.md5s.jsons taihi.md5s.jsons | bash
+
+.PHONY: delete_if_same_image_hash
+delete_if_same_image_hash: takeout.md5s.jsons match_by_image_hash
+	cat takeout.md5s.jsons | ./match_by_image_hash > tmp1
+	bash tmp1
