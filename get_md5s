@@ -1,6 +1,28 @@
 #!/usr/bin/env bash
 
-find "$1" -type f | while IFS= read f
-do
-    echo "$(stat -c '%s' "$f")|$(./get_timestamp "$f")|$(md5sum "$f" | awk '{print $1}')|$(./get_image_hash "$f")|$f"
-done
+(($# == 1)) || {
+    echo "Usage: $0 <directory>" >&2
+    exit 1
+}
+
+#find "$1" -type f | while IFS= read f
+#do
+#    echo "$(stat -c '%s' "$f")|$(./get_timestamp "$f")|$(md5sum "$f" | awk '{print $1}')|$(./get_image_hash "$f")|$f"
+#done
+#exit
+
+./xarpite/xa -q "$(cat <<'END'
+  pipe := PIPE << EXEC("find", ARGS.0, "-type", "f") | file => , -> (
+    OUT << EXEC("bash", "-c", %>
+      set -euo pipefail
+      file=$1
+      size=$(stat -c '%s' "$file")
+      timestamp=$(./get_timestamp "$file")
+      md5=$(md5sum "$file" | awk '{print $1}')
+      image_hash=$(./get_image_hash "$file")
+      echo "$size|$timestamp|$md5|$image_hash|$file"
+    <%, "--", file)
+  )
+  1 .. 16 | LAUNCH ( => pipe | _() !? (_ => *OUT) )
+END
+)" "$@"
