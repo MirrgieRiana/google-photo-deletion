@@ -28,6 +28,22 @@ takeout.md5s: $(TAKEOUT_MD5S)
 %.md5s.jsons: %.md5s md5s_to_jsons
 	cat $< | ./md5s_to_jsons > $@
 
+.PHONY: get_all_md5s
+get_all_md5s:
+	./get_md5s "/mnt/t/Dropbox/カメラアップロード/アーカイブ" | tee archive.md5s
+	./get_md5s "/mnt/t/Dropbox/カメラアップロード/退避" | tee taihi.md5s
+	./get_md5s "/mnt/t/20251208_google-photo-deletion/takeout-20251205T045917Z-001" | tee "takeout-20251205T045917Z-001.md5s"
+	./get_md5s "/mnt/t/20251208_google-photo-deletion/takeout-20251205T045917Z-3-001" | tee "takeout-20251205T045917Z-3-001.md5s"
+	./get_md5s "/mnt/t/20251208_google-photo-deletion/takeout-20251205T045917Z-3-002" | tee "takeout-20251205T045917Z-3-002.md5s"
+	./get_md5s "/mnt/t/20251208_google-photo-deletion/takeout-20251205T045917Z-3-003" | tee "takeout-20251205T045917Z-3-003.md5s"
+	./get_md5s "/mnt/t/20251208_google-photo-deletion/takeout-20251205T045917Z-3-004" | tee "takeout-20251205T045917Z-3-004.md5s"
+	./get_md5s "/mnt/t/20251208_google-photo-deletion/takeout-20251205T045917Z-3-005" | tee "takeout-20251205T045917Z-3-005.md5s"
+	./get_md5s "/mnt/t/20251208_google-photo-deletion/takeout-20251205T045917Z-3-006" | tee "takeout-20251205T045917Z-3-006.md5s"
+	./get_md5s "/mnt/t/20251208_google-photo-deletion/takeout-20251205T045917Z-3-007" | tee "takeout-20251205T045917Z-3-007.md5s"
+	./get_md5s "/mnt/t/20251208_google-photo-deletion/takeout-20251205T045917Z-3-008" | tee "takeout-20251205T045917Z-3-008.md5s"
+	./get_md5s "/mnt/t/20251208_google-photo-deletion/takeout-20251205T045917Z-3-009" | tee "takeout-20251205T045917Z-3-009.md5s"
+	./get_md5s "/mnt/t/20251208_google-photo-deletion/takeout-20251205T045917Z-3-010" | tee "takeout-20251205T045917Z-3-010.md5s"
+
 .PHONY: delete_extra_files
 delete_extra_files:
 	for f in $(TAKEOUT_ZIP:.zip=); do ./delete_extra_files $$f; done
