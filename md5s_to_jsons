@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-xarpite '
+./xarpite/xa '
   IN | index, line => (
     sections := line >> SPLIT["|"] >> TO_ARRAY
     sections.$# == 5 || !! "Invalid line format: $index: $line"
