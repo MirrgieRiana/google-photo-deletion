@@ -23,6 +23,6 @@
       echo "$size|$timestamp|$md5|$image_hash|$file"
     <%, "--", file)
   )
-  1 .. 16 | LAUNCH ( => pipe | _() !? (_ => *OUT) )
+  1 .. 32 | LAUNCH ( => pipe | _() !? (_ => *OUT) )
 END
 )" "$@"
