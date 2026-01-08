@@ -12,6 +12,7 @@
 #exit
 
 ./xarpite/xa -q "$(cat <<'END'
+  ERR := s -> EXEC("bash", "-c", %>printf "%s\n" "$1" >&2<%, "--", s)
   pipe := PIPE << EXEC("find", ARGS.0, "-type", "f") | file => , -> (
     OUT << EXEC("bash", "-c", %>
       set -euo pipefail
@@ -23,6 +24,6 @@
       echo "$size|$timestamp|$md5|$image_hash|$file"
     <%, "--", file)
   )
-  1 .. 32 | LAUNCH ( => pipe | _() !? (_ => *OUT) )
+  1 .. 32 | LAUNCH ( => pipe | _() !? (_ => *ERR) )
 END
 )" "$@"
