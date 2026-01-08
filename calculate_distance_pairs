@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
-./xarpite/xa --jvm -q '
+./xarpite/xa -q "$(cat <<'END'
+  ERR := s -> EXEC("bash", "-c", %>printf "%s\n" "$1" >&2<%, "--", s)
+
   gg := IN
     >> JSONSD
     >> FILTER[o -> o.path =~ /\.jpe?g$/i] // JPEG画像のみ
@@ -11,29 +13,19 @@
 
     >> TO_ARRAY
 
-  tasks := []
-
-  gg() | g => (
+  pipe := PIPE << gg() | g => , -> (
     oo := g.1()
       >> SORTR[by: \_.size.+]
       >> TO_ARRAY
-    oo() >> DROP[1] | i, o =>
-      tasks::push( =>
-        distance := EXEC("./distance", oo.0.path, o.path).+
-        OUT << JSON << {
-          distance: distance
-          larger: oo.0
-          smaller: o
-        }
-      )
+    oo() >> DROP[1] | o => (
+      OUT << JSON << {
+        distance: EXEC("./distance", oo.0.path, o.path).+
+        larger: oo.0
+        smaller: o
+      }
+    )
   )
 
-  0 ~ 12 | LAUNCH ( =>
-    LOOP | (
-      tasks.$# || break!!
-      task := tasks.0
-      tasks::shift()
-      task()
-    ) !: break
-  )
-'
+  1 .. 32 | LAUNCH ( => pipe | _() !? (_ => *ERR) )
+END
+)"
