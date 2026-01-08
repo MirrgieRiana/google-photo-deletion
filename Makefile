@@ -20,7 +20,7 @@ all: $(JSONS)
 
 .PHONY: clean
 clean:
-	rm takeout.md5s $(JSONS)
+	rm takeout.md5s $(JSONS) distance_pairs.jsons
 
 takeout.md5s: $(TAKEOUT_MD5S)
 	cat $(TAKEOUT_MD5S) > $@
