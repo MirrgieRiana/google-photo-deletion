@@ -1,17 +1,38 @@
 #!/usr/bin/env bash
 
-xarpite '
-  (READ(ARGS.0) >> JSONSD), (READ(ARGS.1) >> JSONSD)
+./xarpite/xa -q '
+  OUT << %>
+    <meta charset="UTF-8">
+    <style>
+      .photo {
+        max-width: 200px;
+        max-height: 200px;
+      }
+    </style>
+  <%
+
+  IN
+  >> JSONSD
+  >> FILTER[o -> o.time.$# == 26]
   >> GROUP[by: o -> o.time]
-  >> FILTER[g -> g.0 != "" && g.1.$# > 1] | g =>
-    g.1 | oo =>
-      [
-        oo()
-        >> SORT[by: o -> o.path::replace(/\.\w+$/g; "")]
-        >> SORTR[by: o -> o.size.+]
-        //>> DROP[1]
-      ]()
-  //>> SORT[by: o -> o.path]
-  | o => "$%10d(o.size.+)  $%-26s(o.time)  $(o.path)"
-  //>> JSON[indent: " "]
-' "$1" "$2"
+  >> FILTER[g -> g.1.$# >= 2]
+  | g => (
+    OUT << %>
+      <h3><%= g.0 %></h3>
+      <table>
+        <tr>
+          <%= (
+            g.1()
+            >> SORTR[o -> o.size.+]
+            | o => %>
+              <td>
+                <div><img lazyload class="photo" src="<%= o.path::replace[/^\/mnt\/(.)/g] ( m => "file:///$(m.1):" ) %>"></div>
+                <div><%= o.size %></div>
+              </td>
+            <%
+          ) %>
+        </tr>
+      </table>
+    <%
+  )
+'
