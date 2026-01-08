@@ -55,5 +55,4 @@ delete_if_match: $(JSONS)
 
 .PHONY: delete_if_same_image_hash
 delete_if_same_image_hash: takeout.md5s.jsons match_by_image_hash
-	cat takeout.md5s.jsons | ./match_by_image_hash > tmp1
-	bash tmp1
+	cat takeout.md5s.jsons | ./match_by_image_hash | bash
