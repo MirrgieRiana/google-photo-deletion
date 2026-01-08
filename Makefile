@@ -56,3 +56,6 @@ delete_if_match: $(JSONS)
 .PHONY: delete_if_same_image_hash
 delete_if_same_image_hash: takeout.md5s.jsons match_by_image_hash
 	cat takeout.md5s.jsons | ./match_by_image_hash | bash
+
+distance_pairs.jsons: takeout.md5s.jsons taihi.md5s.jsons archive.md5s.jsons calculate_distance_pairs
+	cat takeout.md5s.jsons taihi.md5s.jsons archive.md5s.jsons | ./calculate_distance_pairs | tee $@

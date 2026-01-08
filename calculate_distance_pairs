@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+
+./xarpite/xa --jvm -q '
+  gg := IN
+    >> JSONSD
+    >> FILTER[o -> o.path =~ /\.jpe?g$/i] // JPEG画像のみ
+
+    >> GROUP[by: g -> g.time]   // タイムスタンプが同じ組
+    >> FILTER[g -> g.0.?]       // タイムスタンプがないものは除外
+    >> FILTER[g -> g.1.$# >= 2] // 重複がない組を除外
+
+    >> TO_ARRAY
+
+  tasks := []
+
+  gg() | g => (
+    oo := g.1()
+      >> SORTR[by: \_.size.+]
+      >> TO_ARRAY
+    oo() >> DROP[1] | i, o =>
+      tasks::push( =>
+        distance := EXEC("./distance", oo.0.path, o.path).+
+        OUT << JSON << {
+          distance: distance
+          larger: oo.0
+          smaller: o
+        }
+      )
+  )
+
+  0 ~ 12 | LAUNCH ( =>
+    LOOP | (
+      tasks.$# || break!!
+      task := tasks.0
+      tasks::shift()
+      task()
+    ) !: break
+  )
+'

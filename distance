@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+(($# == 2)) || {
+  echo "usage: $0 a b" >&2
+  exit 1
+}
+
+type compare > /dev/null || exit
+
+echo "$(compare -metric PHASH png:<(cat "$1" | ./normalize) png:<(cat "$2" | ./normalize) null: 2>&1)"
