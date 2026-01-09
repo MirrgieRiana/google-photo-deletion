@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+./xarpite/xa -q '
+  IN
+  >> JSONSD
+  >> SORT[by: \_.distance]
+  | [_.distance, _.larger.size, _.larger.path, _.smaller.size, _.smaller.path]
+  >> \(
+    OUTB << "\uFEFF" >> UTF8
+    OUTB << _ >> CSV | "$_\n" >> UTF8
+  )
+'
