@@ -7,15 +7,17 @@
     >> JSONSD
     >> FILTER[o -> o.path =~ /\.jpe?g$/i] // JPEG画像のみ
 
-    >> GROUP[by: g -> g.time]   // タイムスタンプが同じ組
-    >> FILTER[g -> g.0.?]       // タイムスタンプがないものは除外
-    >> FILTER[g -> g.1.$# >= 2] // 重複がない組を除外
+    >> GROUP[by: g -> g.time]                                            // タイムスタンプが同じ組
+    >> FILTER[g -> g.0.?]                                                // タイムスタンプがないものは除外
+    >> FILTER[g -> g.0 =~ /^\d{4}:\d{2}:\d{2} \d{2}:\d{2}:\d{2} \d{6}$/] // タイムスタンプの精度が低いものは除外
+    >> FILTER[g -> g.1.$# >= 2]                                          // 重複がない組を除外
 
     >> TO_ARRAY
 
   pipe := PIPE << gg() | g => , -> (
     oo := g.1()
-      >> SORTR[by: \_.size.+]
+      >> SORTR[by: \_.size.+]                   // ファイルサイズが大きいものを優先
+      >> SORTR[by: \_.path::`_@_`("Dropbox").+] // Dropbox内のものを優先
       >> TO_ARRAY
     oo() >> DROP[1] | o => (
       OUT << JSON << {
